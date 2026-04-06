@@ -1,13 +1,623 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ai-question-paper</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Question Paper Generator — PSP Digital Services</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<style>
+:root {
+  --gold:#d4a017; --gold-l:#f5c518; --bg:#0c0d0f; --surf:#13151a;
+  --surf2:#1c1f27; --bdr:#252830; --txt:#e8e9ec; --muted:#6b7180;
+  --green:#22c55e; --red:#ef4444;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;min-height:100vh;}
+
+/* AUTH SCREEN */
+.auth-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;}
+.auth-logo{font-size:11px;font-weight:700;letter-spacing:3px;color:var(--gold);margin-bottom:32px;}
+.auth-card{background:var(--surf);border:1px solid var(--bdr);border-radius:16px;padding:28px 24px;width:100%;max-width:380px;}
+.auth-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;margin-bottom:6px;}
+.auth-sub{font-size:13px;color:var(--muted);margin-bottom:24px;}
+.inp{width:100%;background:var(--surf2);border:1px solid var(--bdr);border-radius:8px;padding:12px 14px;color:var(--txt);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;margin-bottom:12px;}
+.inp:focus{border-color:var(--gold);}
+.btn-gold{width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),#b8860b);color:#111;border:none;border-radius:9px;font-size:14px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity .2s;}
+.btn-gold:disabled{opacity:.5;cursor:not-allowed;}
+.auth-switch{text-align:center;margin-top:16px;font-size:13px;color:var(--muted);}
+.auth-switch a{color:var(--gold);cursor:pointer;font-weight:600;}
+.auth-msg{font-size:12px;padding:8px 12px;border-radius:7px;margin-bottom:10px;display:none;}
+.auth-msg.ok{background:#14532d33;color:var(--green);display:block;}
+.auth-msg.err{background:#7f1d1d33;color:var(--red);display:block;}
+
+/* MAIN APP */
+.app{display:none;}
+.topbar{background:var(--surf);border-bottom:1px solid var(--bdr);padding:10px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;}
+.brand{font-size:11px;font-weight:600;letter-spacing:2px;color:var(--gold);}
+.topright{display:flex;align-items:center;gap:8px;}
+.plan-pill{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;}
+.plan-pill.free{background:#1a1a1a;border:1.5px solid var(--bdr);color:var(--muted);}
+.plan-pill.premium{background:linear-gradient(135deg,#92400e,#d97706);color:#fff;}
+.logout-btn{background:transparent;border:1px solid var(--bdr);color:var(--muted);border-radius:7px;padding:4px 10px;font-size:11px;cursor:pointer;}
+
+.hero{text-align:center;padding:28px 20px 16px;}
+.hero h1{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:700;line-height:1.15;}
+.hero h1 span{color:var(--gold-l);}
+.hero p{color:var(--muted);font-size:13px;margin-top:6px;}
+
+/* STATUS BAR */
+.status-bar{margin:0 16px 14px;background:var(--surf);border:1.5px solid var(--bdr);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;}
+.status-bar.warn{border-color:#92400e;background:#1a110a;}
+.status-bar.premium-bar{border-color:#14532d;background:#0a1a0f;}
+.status-left{font-size:13px;color:var(--muted);}
+.status-left b{color:var(--txt);}
+.upgrade-btn{font-size:12px;color:var(--gold);font-weight:700;cursor:pointer;background:transparent;border:none;padding:0;}
+
+/* LIMIT BLOCK */
+.limit-block{margin:0 16px 14px;background:var(--surf2);border:1.5px solid #92400e;border-radius:12px;padding:20px;text-align:center;display:none;}
+.limit-block h3{font-size:16px;font-weight:700;margin-bottom:6px;}
+.limit-block p{font-size:13px;color:var(--muted);margin-bottom:14px;}
+
+/* FORM */
+.form-wrap{margin:0 16px 16px;background:var(--surf);border:1px solid var(--bdr);border-radius:14px;padding:18px;}
+.sec-ttl{font-size:11px;font-weight:600;letter-spacing:2px;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.sec-ttl::after{content:'';flex:1;height:1px;background:var(--bdr);}
+.field{margin-bottom:14px;}
+.field label{font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(--muted);display:block;margin-bottom:5px;}
+.field input,.field select,.field textarea{width:100%;background:var(--surf2);border:1px solid var(--bdr);border-radius:8px;padding:10px 12px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold);}
+.field textarea{resize:vertical;min-height:68px;}
+.field select option{background:#1c1f27;}
+
+.qt-row{display:flex;align-items:center;background:var(--surf2);border:1px solid var(--bdr);border-radius:8px;padding:10px 12px;margin-bottom:7px;transition:border-color .2s;}
+.qt-row.active{border-color:var(--gold);}
+.qt-row.locked{opacity:.4;pointer-events:none;}
+.qt-chk{width:18px;height:18px;accent-color:var(--gold);flex-shrink:0;}
+.qt-lbl{flex:1;margin-left:9px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px;}
+.lock-tag{font-size:9px;background:#92400e33;color:var(--gold);padding:2px 6px;border-radius:4px;}
+.qt-num{width:46px;background:var(--surf);border:1px solid var(--bdr);border-radius:6px;padding:4px 6px;color:var(--txt);font-size:13px;font-weight:600;text-align:center;outline:none;}
+.total-row{text-align:right;font-size:12px;color:var(--muted);margin-top:4px;}
+.total-row b{color:var(--gold-l);font-size:14px;}
+
+.diff-wrap{margin-top:10px;}
+.diff-lbl{font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.diff-row{display:flex;gap:7px;}
+.diff-btn{flex:1;padding:8px;border-radius:7px;border:1.5px solid var(--bdr);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;}
+.diff-btn.sel{border-color:var(--gold);color:var(--gold-l);background:#1a1400;}
+.diff-locked{opacity:.4;pointer-events:none;}
+
+.ak-row{display:flex;align-items:center;justify-content:space-between;background:var(--surf2);border:1px solid var(--bdr);border-radius:8px;padding:10px 12px;margin-top:10px;}
+.ak-lbl{font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px;}
+.toggle{width:38px;height:21px;background:var(--bdr);border-radius:11px;position:relative;cursor:pointer;transition:background .2s;}
+.toggle.on{background:var(--gold);}
+.toggle::after{content:'';position:absolute;width:15px;height:15px;background:#fff;border-radius:50%;top:3px;left:3px;transition:left .2s;}
+.toggle.on::after{left:20px;}
+.toggle.disabled{opacity:.4;pointer-events:none;}
+
+.gen-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),#b8860b);color:#111;border:none;border-radius:10px;font-size:15px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;transition:opacity .2s;}
+.gen-btn:disabled{opacity:.5;cursor:not-allowed;}
+
+/* OUTPUT */
+.out-wrap{margin:0 16px 16px;background:var(--surf);border:1px solid var(--bdr);border-radius:14px;padding:18px;display:none;}
+.out-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.out-ttl{font-size:12px;font-weight:600;color:var(--gold);letter-spacing:1px;}
+.print-btn{background:var(--gold);color:#111;border:none;border-radius:7px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;}
+#paperOut{white-space:pre-wrap;font-size:13px;line-height:1.75;color:#d0d4de;border:1px solid var(--bdr);border-radius:8px;padding:14px;background:var(--surf2);max-height:420px;overflow-y:auto;}
+.loading{text-align:center;color:var(--muted);font-size:14px;padding:30px;}
+
+/* PAYMENT MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:#000c;z-index:200;align-items:flex-end;justify-content:center;}
+.modal-bg.show{display:flex;}
+.modal{background:var(--surf);border:1px solid var(--bdr);border-radius:18px 18px 0 0;padding:24px 20px 36px;width:100%;max-width:480px;}
+.modal-h{font-size:18px;font-weight:700;margin-bottom:3px;}
+.modal-s{font-size:13px;color:var(--muted);margin-bottom:18px;}
+.price-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
+.price-card{background:var(--surf2);border:2px solid var(--bdr);border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;}
+.price-card.sel{border-color:var(--gold);background:#1a1400;}
+.price-card .amt{font-size:26px;font-weight:700;color:var(--gold-l);}
+.price-card .dur{font-size:12px;color:var(--muted);margin-top:2px;}
+.price-card .save{font-size:10px;background:#14532d33;color:var(--green);padding:2px 7px;border-radius:10px;margin-top:5px;display:inline-block;}
+.feat-list{list-style:none;margin-bottom:18px;}
+.feat-list li{font-size:13px;padding:5px 0;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:7px;}
+.feat-list li:last-child{border:none;}
+.pay-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--gold),#b8860b);color:#111;border:none;border-radius:10px;font-size:15px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;}
+.pay-note{font-size:11px;color:var(--muted);text-align:center;margin-top:8px;}
+.modal-close{width:100%;padding:11px;background:transparent;border:1.5px solid var(--bdr);border-radius:8px;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;margin-top:10px;font-family:'DM Sans',sans-serif;}
+
+@media print{.topbar,.hero,.status-bar,.form-wrap,.limit-block,.out-header,.gen-btn{display:none!important;}.out-wrap{display:block!important;border:none;margin:0;padding:0;}#paperOut{max-height:none;border:none;background:white;color:black;}}
+</style>
+</head>
+<body>
+
+<!-- ===== AUTH SCREEN ===== -->
+<div id="authScreen" class="auth-screen">
+  <div class="auth-logo">PSP DIGITAL SERVICES</div>
+  
+  <!-- LOGIN -->
+  <div id="loginBox" class="auth-card">
+    <div class="auth-title">Welcome Back 👋</div>
+    <div class="auth-sub">AI Question Paper Generator-এ login করুন</div>
+    <div id="loginMsg" class="auth-msg"></div>
+    <input class="inp" type="email" id="loginEmail" placeholder="আপনার Email address">
+    <input class="inp" type="password" id="loginPass" placeholder="Password">
+    <button class="btn-gold" onclick="login()">Login করুন</button>
+    <div class="auth-switch">Account নেই? <a onclick="showSignup()">Sign up করুন</a></div>
+  </div>
+
+  <!-- SIGNUP -->
+  <div id="signupBox" class="auth-card" style="display:none;">
+    <div class="auth-title">Account তৈরি করুন ✨</div>
+    <div class="auth-sub">100% Free — কোনো credit card লাগবে না</div>
+    <div id="signupMsg" class="auth-msg"></div>
+    <input class="inp" type="text" id="signupName" placeholder="আপনার নাম">
+    <input class="inp" type="email" id="signupEmail" placeholder="Email address">
+    <input class="inp" type="tel" id="signupPhone" placeholder="WhatsApp number (10 digits)">
+    <input class="inp" type="password" id="signupPass" placeholder="Password (min 6 characters)">
+    <button class="btn-gold" onclick="signup()">Account তৈরি করুন</button>
+    <div class="auth-switch">Already account আছে? <a onclick="showLogin()">Login করুন</a></div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div id="mainApp" class="app">
+  <div class="topbar">
+    <span class="brand">PSP DIGITAL SERVICES</span>
+    <div class="topright">
+      <span class="plan-pill free" id="planPill">Free Plan</span>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="hero">
+    <h1>AI Question Paper<br><span>Generator</span></h1>
+    <p>Teachers-এর 4-6 ঘণ্টার কাজ — এখন 60 seconds-এ ✨</p>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar" id="statusBar">
+    <span class="status-left" id="statusText">আজকের বাকি: <b>2 papers</b></span>
+    <button class="upgrade-btn" onclick="openPayment()">👑 Premium পান →</button>
+  </div>
+
+  <!-- LIMIT BLOCK -->
+  <div class="limit-block" id="limitBlock">
+    <h3>🔒 আজকের Free limit শেষ</h3>
+    <p>আজ ২টা paper তৈরি হয়েছে।<br>কাল আবার free-তে try করুন।</p>
+    <button class="btn-gold" style="max-width:200px;margin:0 auto;" onclick="openPayment()">👑 Premium নিন</button>
+  </div>
+
+  <!-- FORM -->
+  <div class="form-wrap" id="formWrap">
+    <div class="sec-ttl">PAPER DETAILS</div>
+
+    <div class="field">
+      <label>SUBJECT *</label>
+      <input type="text" id="subject" placeholder="e.g. Science, Mathematics, History">
+    </div>
+    <div class="field">
+      <label>CLASS / GRADE *</label>
+      <select id="grade">
+        <option value="">Select Class</option>
+        <option>Class 1</option><option>Class 2</option><option>Class 3</option>
+        <option>Class 4</option><option>Class 5</option><option>Class 6</option>
+        <option>Class 7</option><option>Class 8</option><option>Class 9</option>
+        <option>Class 10</option><option>Class 11</option><option>Class 12</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>CHAPTER / TOPIC *</label>
+      <input type="text" id="chapter" placeholder="e.g. Photosynthesis, Linear Equations">
+    </div>
+    <div class="field">
+      <label>BOARD</label>
+      <select id="board">
+        <option>CBSE</option><option>ICSE</option><option>WBCHSE</option><option>Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>LANGUAGE</label>
+      <select id="language">
+        <option>English</option><option>Bengali</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>SPECIAL INSTRUCTIONS (OPTIONAL)</label>
+      <textarea id="instructions" placeholder="e.g. Focus on numericals, NCERT aligned..."></textarea>
+    </div>
+
+    <div class="sec-ttl" style="margin-top:4px;">QUESTION TYPES</div>
+
+    <div class="qt-row active" id="qt-mcq">
+      <input type="checkbox" class="qt-chk" id="chk-mcq" checked onchange="qToggle('mcq')">
+      <span class="qt-lbl">⊙ MCQ</span>
+      <input type="number" class="qt-num" id="cnt-mcq" value="10" min="0" max="30" oninput="updateTotal()">
+    </div>
+    <div class="qt-row active" id="qt-short">
+      <input type="checkbox" class="qt-chk" id="chk-short" checked onchange="qToggle('short')">
+      <span class="qt-lbl">✎ Short Answer</span>
+      <input type="number" class="qt-num" id="cnt-short" value="5" min="0" max="20" oninput="updateTotal()">
+    </div>
+    <div class="qt-row locked" id="qt-long">
+      <input type="checkbox" class="qt-chk" id="chk-long" onchange="qToggle('long')">
+      <span class="qt-lbl">≡ Long Answer <span class="lock-tag">👑 Premium</span></span>
+      <input type="number" class="qt-num" id="cnt-long" value="5" min="0" max="15" oninput="updateTotal()">
+    </div>
+    <div class="qt-row locked" id="qt-tf">
+      <input type="checkbox" class="qt-chk" id="chk-tf" onchange="qToggle('tf')">
+      <span class="qt-lbl">✓✗ True / False <span class="lock-tag">👑 Premium</span></span>
+      <input type="number" class="qt-num" id="cnt-tf" value="5" min="0" max="10" oninput="updateTotal()">
+    </div>
+    <div class="total-row">Total: <b id="totalQ">15</b> questions</div>
+
+    <div id="diffWrap" class="diff-wrap diff-locked">
+      <div class="diff-lbl">DIFFICULTY <span class="lock-tag">👑 Premium</span></div>
+      <div class="diff-row">
+        <button class="diff-btn" onclick="setDiff('Easy')">Easy</button>
+        <button class="diff-btn sel" onclick="setDiff('Mixed')">Mixed</button>
+        <button class="diff-btn" onclick="setDiff('Hard')">Hard</button>
+      </div>
+    </div>
+
+    <div class="ak-row" style="opacity:.45" id="akRow">
+      <span class="ak-lbl">🔑 Answer Key <span class="lock-tag">👑 Premium</span></span>
+      <div class="toggle disabled" id="akToggle" onclick="toggleAK()"></div>
+    </div>
+
+    <button class="gen-btn" id="genBtn" onclick="generate()">
+      ⚡ Generate (<span id="genCountLbl">15</span> Questions)
+    </button>
+  </div>
+
+  <!-- OUTPUT -->
+  <div class="out-wrap" id="outWrap">
+    <div class="out-header">
+      <span class="out-ttl">✅ QUESTION PAPER READY</span>
+      <button class="print-btn" onclick="window.print()">🖨️ Print</button>
+    </div>
+    <div id="paperOut"></div>
+  </div>
+</div>
+
+<!-- PAYMENT MODAL -->
+<div class="modal-bg" id="modalBg" onclick="closeMBg(event)">
+  <div class="modal">
+    <div class="modal-h">👑 PSP Premium Plan</div>
+    <div class="modal-s">একবার pay করুন — automatic premium active হবে!</div>
+
+    <div class="price-cards">
+      <div class="price-card sel" id="pc1" onclick="selectPlan(1)">
+        <div class="amt">₹49</div>
+        <div class="dur">1 মাস</div>
+      </div>
+      <div class="price-card" id="pc3" onclick="selectPlan(3)">
+        <div class="amt">₹129</div>
+        <div class="dur">3 মাস</div>
+        <span class="save">₹18 সাশ্রয়!</span>
+      </div>
+    </div>
+
+    <ul class="feat-list">
+      <li>✅ Unlimited papers per day</li>
+      <li>✅ Long Answer + True/False</li>
+      <li>✅ Answer Key auto generate</li>
+      <li>✅ Easy / Medium / Hard difficulty</li>
+      <li>✅ Bengali + English support</li>
+      <li>✅ সরাসরি Print</li>
+    </ul>
+
+    <button class="pay-btn" id="payBtn" onclick="startPayment()">
+      💳 Razorpay-তে Pay করুন — ₹49
+    </button>
+    <div class="pay-note">✅ Secure payment • Payment হলেই auto Premium active হবে</div>
+    <button class="modal-close" onclick="closeModal()">বন্ধ করুন</button>
+  </div>
+</div>
+
+<script>
+// ============ CONFIG ============
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON = 'YOUR_SUPABASE_ANON_KEY';
+const RAZORPAY_KEY = 'YOUR_RAZORPAY_KEY_ID';
+
+// ============ STATE ============
+let user = null;
+let isPremium = false;
+let premiumUntil = null;
+let selectedPlan = 1;
+let answerKey = false;
+let difficulty = 'Mixed';
+const FREE_DAILY = 2;
+const FREE_MAX_Q = 15;
+
+// ============ AUTH ============
+function showSignup() {
+  document.getElementById('loginBox').style.display = 'none';
+  document.getElementById('signupBox').style.display = 'block';
+}
+function showLogin() {
+  document.getElementById('signupBox').style.display = 'none';
+  document.getElementById('loginBox').style.display = 'block';
+}
+
+async function signup() {
+  const name = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const phone = document.getElementById('signupPhone').value.trim();
+  const pass = document.getElementById('signupPass').value;
+  const msg = document.getElementById('signupMsg');
+
+  if (!name || !email || !phone || !pass) {
+    msg.textContent = 'সব field fill করুন'; msg.className = 'auth-msg err'; return;
+  }
+  if (pass.length < 6) {
+    msg.textContent = 'Password কমপক্ষে 6 characters'; msg.className = 'auth-msg err'; return;
+  }
+
+  msg.textContent = 'Account তৈরি হচ্ছে...'; msg.className = 'auth-msg ok';
+
+  const res = await fetch('/api/auth', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'signup', name, email, phone, password: pass })
+  });
+  const data = await res.json();
+  if (data.user) {
+    user = data.user;
+    msg.textContent = '✅ Account তৈরি হয়েছে!'; msg.className = 'auth-msg ok';
+    setTimeout(() => loadApp(), 800);
+  } else {
+    msg.textContent = data.error || 'Error হয়েছে। আবার try করুন।'; msg.className = 'auth-msg err';
+  }
+}
+
+async function login() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const msg = document.getElementById('loginMsg');
+
+  if (!email || !pass) { msg.textContent = 'Email ও Password দিন'; msg.className = 'auth-msg err'; return; }
+
+  msg.textContent = 'Login হচ্ছে...'; msg.className = 'auth-msg ok';
+
+  const res = await fetch('/api/auth', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'login', email, password: pass })
+  });
+  const data = await res.json();
+  if (data.user) {
+    user = data.user;
+    localStorage.setItem('psp_session', JSON.stringify(user));
+    loadApp();
+  } else {
+    msg.textContent = data.error || 'Email বা Password ভুল'; msg.className = 'auth-msg err';
+  }
+}
+
+function logout() {
+  localStorage.removeItem('psp_session');
+  user = null; isPremium = false;
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'flex';
+}
+
+// ============ LOAD APP ============
+async function loadApp() {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+  document.getElementById('mainApp').className = 'app';
+
+  // Check premium status from server
+  const res = await fetch('/api/status?userId=' + user.id);
+  const data = await res.json();
+  isPremium = data.isPremium;
+  premiumUntil = data.until;
+
+  resetDailyIfNeeded();
+  updateUI();
+  updateTotal();
+}
+
+// ============ DAILY COUNTER ============
+function resetDailyIfNeeded() {
+  const today = new Date().toISOString().split('T')[0];
+  const stored = localStorage.getItem('psp_date_' + (user?.id || ''));
+  if (stored !== today) {
+    localStorage.setItem('psp_date_' + (user?.id || ''), today);
+    localStorage.setItem('psp_count_' + (user?.id || ''), '0');
+  }
+}
+function getCount() { return parseInt(localStorage.getItem('psp_count_' + (user?.id || '')) || '0'); }
+function incCount() { localStorage.setItem('psp_count_' + (user?.id || ''), String(getCount() + 1)); }
+
+// ============ UI UPDATE ============
+function updateUI() {
+  const pill = document.getElementById('planPill');
+  const statusBar = document.getElementById('statusBar');
+  const limitBlock = document.getElementById('limitBlock');
+  const formWrap = document.getElementById('formWrap');
+
+  if (isPremium) {
+    pill.className = 'plan-pill premium'; pill.textContent = '👑 Premium';
+    statusBar.className = 'status-bar premium-bar';
+    document.getElementById('statusText').innerHTML = `👑 <b>Premium</b> — ${premiumUntil ? 'Valid till ' + premiumUntil : 'Active'}`;
+    document.querySelector('.upgrade-btn').style.display = 'none';
+    limitBlock.style.display = 'none';
+    formWrap.style.display = 'block';
+    // Unlock features
+    ['qt-long','qt-tf'].forEach(id => document.getElementById(id).classList.remove('locked'));
+    document.getElementById('diffWrap').classList.remove('diff-locked');
+    document.getElementById('akRow').style.opacity = '1';
+    document.getElementById('akToggle').classList.remove('disabled');
+  } else {
+    pill.className = 'plan-pill free'; pill.textContent = 'Free Plan';
+    const rem = Math.max(0, FREE_DAILY - getCount());
+    statusBar.className = rem === 0 ? 'status-bar warn' : 'status-bar';
+    document.getElementById('statusText').innerHTML = `আজকের বাকি: <b>${rem} paper${rem !== 1 ? 's' : ''}</b>`;
+    if (rem === 0) {
+      limitBlock.style.display = 'block';
+      formWrap.style.display = 'none';
+    } else {
+      limitBlock.style.display = 'none';
+      formWrap.style.display = 'block';
+    }
+    ['qt-long','qt-tf'].forEach(id => document.getElementById(id).classList.add('locked'));
+    document.getElementById('diffWrap').classList.add('diff-locked');
+    document.getElementById('akRow').style.opacity = '.45';
+    document.getElementById('akToggle').classList.add('disabled');
+  }
+}
+
+// ============ QUESTION TYPES ============
+function qToggle(t) {
+  const chk = document.getElementById('chk-'+t);
+  document.getElementById('qt-'+t).classList.toggle('active', chk.checked);
+  updateTotal();
+}
+function updateTotal() {
+  let tot = 0;
+  ['mcq','short','long','tf'].forEach(t => {
+    if (document.getElementById('chk-'+t)?.checked)
+      tot += parseInt(document.getElementById('cnt-'+t).value) || 0;
+  });
+  if (!isPremium) {
+    if (tot > FREE_MAX_Q) {
+      document.getElementById('cnt-mcq').value = 10;
+      document.getElementById('cnt-short').value = 5;
+      tot = 15;
+    }
+  }
+  document.getElementById('totalQ').textContent = tot;
+  document.getElementById('genCountLbl').textContent = tot;
+}
+function setDiff(d) {
+  difficulty = d;
+  document.querySelectorAll('.diff-btn').forEach(b => b.classList.toggle('sel', b.textContent === d));
+}
+function toggleAK() {
+  if (!isPremium) return;
+  answerKey = !answerKey;
+  document.getElementById('akToggle').classList.toggle('on', answerKey);
+}
+
+// ============ GENERATE ============
+async function generate() {
+  const subject = document.getElementById('subject').value.trim();
+  const grade = document.getElementById('grade').value;
+  const chapter = document.getElementById('chapter').value.trim();
+  if (!subject || !grade || !chapter) { alert('Subject, Class আর Chapter দিতে হবে!'); return; }
+
+  const mcq = document.getElementById('chk-mcq').checked ? (parseInt(document.getElementById('cnt-mcq').value)||0) : 0;
+  const sh = document.getElementById('chk-short').checked ? (parseInt(document.getElementById('cnt-short').value)||0) : 0;
+  const lng = isPremium && document.getElementById('chk-long').checked ? (parseInt(document.getElementById('cnt-long').value)||0) : 0;
+  const tf = isPremium && document.getElementById('chk-tf').checked ? (parseInt(document.getElementById('cnt-tf').value)||0) : 0;
+
+  const btn = document.getElementById('genBtn');
+  btn.disabled = true; btn.textContent = '⏳ Generating...';
+
+  const outWrap = document.getElementById('outWrap');
+  const paperOut = document.getElementById('paperOut');
+  outWrap.style.display = 'block';
+  paperOut.innerHTML = '<div class="loading">✨ AI question paper তৈরি হচ্ছে...</div>';
+  outWrap.scrollIntoView({ behavior: 'smooth' });
+
+  try {
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: user.id,
+        subject, grade, chapter,
+        board: document.getElementById('board').value,
+        language: document.getElementById('language').value,
+        instructions: document.getElementById('instructions').value,
+        questionTypes: { mcq, short: sh, long: lng, truefalse: tf, difficulty },
+        isPremium, answerKey: isPremium && answerKey
+      })
+    });
+    const data = await res.json();
+    if (data.paper) {
+      paperOut.textContent = data.paper;
+      if (!isPremium) { incCount(); updateUI(); }
+    } else {
+      paperOut.innerHTML = `<div class="loading" style="color:var(--red)">❌ ${data.error || 'Error হয়েছে'}</div>`;
+    }
+  } catch (e) {
+    paperOut.innerHTML = '<div class="loading" style="color:var(--red)">❌ Network error. আবার try করুন।</div>';
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = `⚡ Generate (<span id="genCountLbl">${mcq+sh+lng+tf}</span> Questions)`;
+}
+
+// ============ PAYMENT ============
+function selectPlan(m) {
+  selectedPlan = m;
+  document.getElementById('pc1').classList.toggle('sel', m === 1);
+  document.getElementById('pc3').classList.toggle('sel', m === 3);
+  const amt = m === 1 ? 49 : 129;
+  document.getElementById('payBtn').textContent = `💳 Razorpay-তে Pay করুন — ₹${amt}`;
+}
+
+async function startPayment() {
+  const amt = selectedPlan === 1 ? 49 : 129;
+  
+  // Create order on server
+  const res = await fetch('/api/payment', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId: user.id, months: selectedPlan, amount: amt })
+  });
+  const data = await res.json();
+  if (!data.orderId) { alert('Payment শুরু করা যাচ্ছে না। আবার try করুন।'); return; }
+
+  const options = {
+    key: RAZORPAY_KEY,
+    amount: amt * 100,
+    currency: 'INR',
+    name: 'PSP Digital Services',
+    description: `Premium Plan — ${selectedPlan} মাস`,
+    order_id: data.orderId,
+    prefill: { email: user.email, contact: user.phone },
+    theme: { color: '#d4a017' },
+    handler: async function(response) {
+      // Verify payment on server
+      const vres = await fetch('/api/payment', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          months: selectedPlan,
+          paymentId: response.razorpay_payment_id,
+          orderId: response.razorpay_order_id,
+          signature: response.razorpay_signature
+        })
+      });
+      const vdata = await vres.json();
+      if (vdata.success) {
+        isPremium = true;
+        premiumUntil = vdata.until;
+        closeModal();
+        updateUI();
+        alert('🎉 Premium activate হয়ে গেছে! ' + vdata.until + ' পর্যন্ত valid।');
+      }
+    }
+  };
+  new Razorpay(options).open();
+}
+
+function openPayment() { document.getElementById('modalBg').classList.add('show'); }
+function closeModal() { document.getElementById('modalBg').classList.remove('show'); }
+function closeMBg(e) { if (e.target === document.getElementById('modalBg')) closeModal(); }
+
+// ============ AUTO LOGIN ============
+(function autoLogin() {
+  const stored = localStorage.getItem('psp_session');
+  if (stored) {
+    try { user = JSON.parse(stored); loadApp(); } catch(e) {}
+  }
+})();
+</script>
+</body>
 </html>
