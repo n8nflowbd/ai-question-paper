@@ -1,7 +1,6 @@
-import Razorpay from 'razorpay';
-import crypto from 'crypto';
-import { createClient } from '@supabase/supabase-js';
-
+const Razorpay = require('razorpay');
+const crypto = require('crypto');
+const { createClient } = require('@supabase/supabase-js');
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
