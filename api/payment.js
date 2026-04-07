@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   if (req.method === 'POST') {
     const { userId, months, amount } = req.body;
     const order = await razorpay.orders.create({
-      amount: amount * 100,
+      amount: parseInt(amount) * 100,
       currency: 'INR',
       receipt: `psp_${userId}_${Date.now()}`
     });
