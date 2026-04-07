@@ -18,7 +18,7 @@ export default async function handler(req, res) {
       const order = await razorpay.orders.create({
         amount: parseInt(amount) * 100,
         currency: 'INR',
-        receipt: `psp_${userId}_${Date.now()}`,
+        receipt: `psp_${Date.now()}`,
       });
       return res.status(200).json({ orderId: order.id });
     }
