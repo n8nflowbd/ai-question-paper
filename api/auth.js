@@ -13,7 +13,7 @@ export default async function handler(req, res) {
   if (action === 'signup') {
     const { data: existing } = await supabase.from('users').select('id').eq('email', email.toLowerCase()).single();
     if (existing) return res.json({ error: 'এই email দিয়ে আগেই account আছে।' });
-    const hash = await bcrypt.hash(password, 10);
+    const hash = await bcrypt.hash(password, 8);
     const { data: newUser, error } = await supabase.from('users').insert({ name, email: email.toLowerCase(), phone, password_hash: hash }).select('id, name, email, phone').single();
     if (error) return res.json({ error: 'Account তৈরি হয়নি।' });
     return res.json({ user: newUser });
