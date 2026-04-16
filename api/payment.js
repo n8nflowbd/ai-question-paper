@@ -1,12 +1,13 @@
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
+
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
 );
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   try {
     const razorpay = new Razorpay({
       key_id: process.env.RAZORPAY_KEY_ID,
@@ -15,8 +16,12 @@ export default async function handler(req, res) {
 
     if (req.method === 'POST') {
       const { userId, amount } = req.body;
+      const amountInt = parseInt(amount, 10);
+      if (!amountInt || isNaN(amountInt)) {
+        return res.status(400).json({ error: 'Invalid amount' });
+      }
       const order = await razorpay.orders.create({
-        amount: parseInt(amount) * 100,
+        amount: amountInt * 100,
         currency: 'INR',
         receipt: `psp_${Date.now()}`,
       });
@@ -32,12 +37,10 @@ export default async function handler(req, res) {
         .digest('hex');
       if (expectedSig !== signature)
         return res.status(400).json({ success: false });
-
       const today = new Date();
       const expires = new Date(today);
-      expires.setMonth(expires.getMonth() + (months || 1));
+      expires.setMonth(expires.getMonth() + (parseInt(months, 10) || 1));
       const expiresStr = expires.toISOString().split('T')[0];
-
       await supabase.from('subscriptions').insert({
         user_id: userId,
         status: 'active',
@@ -45,16 +48,14 @@ export default async function handler(req, res) {
         razorpay_payment_id: paymentId,
         razorpay_order_id: orderId,
         amount_paid: months === 3 ? 129 : 49,
-        months_purchased: months,
+        months_purchased: parseInt(months, 10) || 1,
       });
-
       return res.status(200).json({ success: true, until: expiresStr });
     }
 
     return res.status(405).json({ error: 'Method not allowed' });
-
   } catch (err) {
     console.error('Payment error:', err);
     return res.status(500).json({ error: err.message });
   }
-}
+};
