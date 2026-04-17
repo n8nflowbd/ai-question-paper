@@ -1001,7 +1001,7 @@ export default function App() {
                 {todayCount >= FREE_LIMIT && " · Limit শেষ!"}
               </div>
               <button className="upgrade-link" onClick={() => setShowPayment(true)}>
-                👑 Premium নাও — ₹49/মাস
+                👑 Premium নাও — ₹99/মাস
               </button>
             </div>
           )}
@@ -1159,7 +1159,7 @@ export default function App() {
 
               <div className="plan-cards">
                 <div className={`plan-card ${selectedMonths === 1 ? "selected" : ""}`} onClick={() => setSelectedMonths(1)}>
-                  <div className="plan-price">₹49</div>
+                  <div className="plan-price">₹99</div>
                   <div className="plan-dur">১ মাস</div>
                 </div>
                 <div className={`plan-card ${selectedMonths === 3 ? "selected" : ""}`} onClick={() => setSelectedMonths(3)}>
