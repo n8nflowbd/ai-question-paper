@@ -1165,7 +1165,7 @@ export default function App() {
                 <div className={`plan-card ${selectedMonths === 3 ? "selected" : ""}`} onClick={() => setSelectedMonths(3)}>
                   <div className="plan-price">₹249</div>
                   <div className="plan-dur">৩ মাস</div>
-                  <div className="plan-save">₹18 সাশ্রয়!</div>
+                  <div className="plan-save">₹48 সাশ্রয়!</div>
                 </div>
               </div>
 
