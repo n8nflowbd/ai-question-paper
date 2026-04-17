@@ -818,7 +818,7 @@ export default function App() {
     const ok = await loadRazorpayScript();
     if (!ok) { setPayLoading(false); alert("Razorpay load hoyni!"); return; }
 
-    const amount = selectedMonths === 3 ? 129 : 49;
+    const amount = selectedMonths === 3 ? 249 : 99;
     try {
       // Create order
       const orderRes = await fetch("/api/payment", {
@@ -1163,7 +1163,7 @@ export default function App() {
                   <div className="plan-dur">১ মাস</div>
                 </div>
                 <div className={`plan-card ${selectedMonths === 3 ? "selected" : ""}`} onClick={() => setSelectedMonths(3)}>
-                  <div className="plan-price">₹129</div>
+                  <div className="plan-price">₹249</div>
                   <div className="plan-dur">৩ মাস</div>
                   <div className="plan-save">₹18 সাশ্রয়!</div>
                 </div>
@@ -1186,7 +1186,7 @@ export default function App() {
               </div>
 
               <button className="pay-btn" onClick={handlePayment} disabled={payLoading}>
-                {payLoading ? "⏳ Processing..." : `💳 Razorpay-তে Pay করো — ₹${selectedMonths === 3 ? 129 : 49}`}
+                {payLoading ? "⏳ Processing..." : `💳 Razorpay-তে Pay করো — ₹${selectedMonths === 3 ? 249 : 99}`}
               </button>
               <p className="pay-note">✅ Secure payment • Payment হলেই auto Premium active হবে</p>
             </div>
