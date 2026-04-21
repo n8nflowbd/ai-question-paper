@@ -818,7 +818,7 @@ export default function App() {
     const ok = await loadRazorpayScript();
     if (!ok) { setPayLoading(false); alert("Razorpay load hoyni!"); return; }
 
-    const amount = selectedMonths === 3 ? 249 : 99;
+    const amount = selectedMonths === 3 ? 249 : 99 :
     try {
       // Create order
       const orderRes = await fetch("/api/payment", {
