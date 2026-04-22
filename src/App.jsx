@@ -1032,7 +1032,7 @@ export default function App() {
               <div className="field">
                 <label>Language</label>
                 <select value={form.language} onChange={e => setField("language", e.target.value)}>
-                  {["English","Hindi","Bengali","Mixed (Hinglish)"].map(l => <option key={l}>{l}</option>)}
+                  {["English","Hindi","Bengali","Mixed (Hinglish)"]. map (l => <option key={l}>{l}</option>)}
                 </select>
               </div>
               <div className="field full">
