@@ -1,20 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@supabase/supabase-js";
-
 // ── Supabase client ──────────────────────────────────────────────
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY
 );
-
 // ── Fonts & global CSS ───────────────────────────────────────────
 const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Hind:wght@400;500;600&display=swap');`;
-
 const css = `
   ${FONTS}
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: #0d1117; }
-
   .app {
     min-height: 100vh;
     background: #0d1117;
