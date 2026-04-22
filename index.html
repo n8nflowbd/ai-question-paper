@@ -556,12 +556,12 @@ function selectPlan(m) {
   selectedPlan = m;
   document.getElementById('pc1').classList.toggle('sel', m === 1);
   document.getElementById('pc3').classList.toggle('sel', m === 3);
-  const amt = m === 1 ? 49 : 129;
+  const amt = m === 1 ? 99 : 249;
   document.getElementById('payBtn').textContent = `💳 Razorpay-তে Pay করুন — ₹${amt}`;
 }
 
 async function startPayment() {
-  const amt = selectedPlan === 1 ? 49 : 129;
+  const amt = selectedPlan === 1 ? 99 : 249;
   
   // Create order on server
   const res = await fetch('/api/payment', {
